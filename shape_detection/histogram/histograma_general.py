@@ -2,16 +2,17 @@ import cv2
 from matplotlib import pyplot as plt
 import numpy as np
 
-img = cv2.imread('nadal.jpg', 0)
+img = cv2.imread('CR7.jpg', 0)
 histg = cv2.calcHist([img], [0], None, [256], [0,256])
 
 plt.plot(histg)
 plt.show()
 
-th2 = cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 3, 12)
+th2 = cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 5, 7)
 
-#plt.imshow(th2, 'gray')
-#plt.show()
+plt.imshow(th2, 'gray')
+plt.show()
+
 #th2d = cv2.bilateralFilter(th2, None, 15, 75)
 th2d = (255-th2)
 #kernel = np.ones((3,3), np.uint8)
@@ -25,7 +26,7 @@ th2e = cv2.filter2D(th2d, -1, kernel)
 
 #kernel = np.ones((2,2), np.uint8)
 #th2e = cv2.morphologyEx(th2e, cv2.MORPH_OPEN, kernel, iterations=7)
-kernel = np.ones((10,10), np.uint8)
+kernel = np.ones((6,6), np.uint8)
 th2e = cv2.morphologyEx(th2e, cv2.MORPH_CLOSE, kernel, iterations=3)
 
 # Find outer contour and fill with white
@@ -47,9 +48,9 @@ th2e = cv2.morphologyEx(th2e, cv2.MORPH_OPEN, kernel, iterations=7)
 plt.imshow(th2e, 'gray')
 plt.show()
 
-cv2.imwrite('nadal_util.jpg', th2e)
+cv2.imwrite('CR7_util.jpg', th2e)
 
 prueba_mask = cv2.bitwise_and(img, img, mask=th2e)
 plt.imshow(prueba_mask, 'gray')
 plt.show()
-cv2.imwrite('nadal_mask.jpg', th2e)
+cv2.imwrite('CR7_mask.jpg', th2e)
