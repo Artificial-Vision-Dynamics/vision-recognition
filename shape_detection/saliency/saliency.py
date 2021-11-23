@@ -10,12 +10,13 @@ import fiftyone.zoo as foz
 
 ## CV2 SALIENCY FUNCTIONS
 
-folder = 'val'
+folder = 'persons_val'
 method = 2
 numMin = 127
 tipo = 4
 ## LOAD THE IMAGE (cambiar directory con lo que suba Rodrigo)
-directory = "./images/" + folder + "2017"
+directory = "../" + folder
+print(directory)
 for i in range(58,59):
     f = os.listdir(directory)[i]
     nameImg = directory + '/' + f # str(i).zfill(12)
