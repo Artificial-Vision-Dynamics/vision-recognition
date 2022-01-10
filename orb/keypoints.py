@@ -2,6 +2,7 @@ import numpy as np
 import cv2 as cv2
 from matplotlib import pyplot as plt
 import os
+import scipy.stats
 
 # Change directory
 os.chdir('D:')
@@ -16,7 +17,7 @@ radio = 300
 # Imágenes
 folder = 'orb'  # directory = '../' + folder
 name = 'persona'
-nameImg1 = folder + '/' + name + '1.jpg'
+nameImg1 = folder + '/' + name + '5.jpg'
 nameImg2 = folder + '/' + name + '4.jpg' # Referencia
 img1 = cv2.imread(nameImg1, 0)
 img2 = cv2.imread(nameImg2, 0)
@@ -27,7 +28,7 @@ if methodName == 'orb':     # ORB
     method = orb
     bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
 elif methodName == 'sift':  # SIFT
-    sift = cv2.SIFT_create()
+    sift = cv2.SIFT_create(15000)  #xfeatures2d.
     method = sift
     bf = cv2.BFMatcher(cv2.NORM_L1, crossCheck=False)
 
@@ -46,9 +47,14 @@ img2DrawKP = cv2.drawKeypoints(img2, img2KP, None, color=(0, 250, 0), flags=0)
 if matchear == 1:
     # Matchear los descriptors de ambas imágenes
     matches = bf.match(img1Des, img2Des)
+    # img1KP_pt = np.float32([(img1KP[e].pt) for e in range(0, len(img1KP))])
+    # img2KP_pt = np.float32([(img2KP[e].pt) for e in range(0, len(img2KP))])
+    # matches = cv2.getAffineTransform(img1KP_pt[0:3], img2KP_pt[0:3])
+    #matches = cv2.estimateAffine2D(img1KP, img2KP, True)
 
+    
     # Ordenar los matches por importancia 
-    matches = sorted(matches, key=lambda x: x.distance)
+    matches = sorted(matches, key=lambda x: x.distance)[0:20]
 
     # RANSAC eliminar los matches malos y guardar su posición en x, y
     points1 = np.zeros((len(matches), 2), dtype=np.float32)
@@ -77,16 +83,35 @@ if matchear == 1:
     # Ordenar la posición de los matches por su parte de cuerpo que corresponden
     matchesOrdenados = sorted(matchesParte, key=lambda x: x[2])
     #print(matchesOrdenados)
+    matchesOrdenadosPt = np.float32([(matchesOrdenados[e][0:3]) for e in range(1, len(matchesOrdenados))])  # Quitamos el primer 0,0
     
-    # Media de los puntos importantes
     posParteFin = np.zeros((5, 2))
+    aux1 = 3
+    aux2 = 0
+    for k, match in enumerate(matchesOrdenadosPt):
+        if match[2] != aux1 or k+1 == len(matchesOrdenadosPt):
+            print(aux1)
+            ppt = matchesOrdenadosPt[aux2:k]
+            for n in range(0,2):   
+                liminf = scipy.stats.scoreatpercentile(ppt[n], 25)
+                limsup = scipy.stats.scoreatpercentile(ppt[n], 75)
+                print("El 25% percentil es =", liminf, "y el 75% percentil es =", limsup)
+                trimean = scipy.stats.mstats.tmean(ppt[n], (liminf, limsup))
+                print(trimean)
+                posParteFin[aux1-1][n] = trimean
+            aux1 = int(match[2])
+            aux2 = k
+            
+    # Media de los puntos importantes
+    
     for k,parte in enumerate(posParte):
         if numPartes[k] == 0:
             posParteFin[k, :] = [a/b*c for a, b, c in zip(partesCuerpo[k],
                                       [img2.shape[0], 1], [img1.shape[0], 1])]
             #posParteFin[k, :] = partesCuerpo[k] / [img2.shape[0],1] * [img1.shape[0],1] #[0, 0]
         else:
-            posParteFin[k, :] = [parte[0]/numPartes[k], parte[1]/numPartes[k]]
+            print(posParteFin)
+            #posParteFin[k, :] = [parte[0]/numPartes[k], parte[1]/numPartes[k]]
     print(posParteFin)
     
     # Dibujar puntos cuerpos
