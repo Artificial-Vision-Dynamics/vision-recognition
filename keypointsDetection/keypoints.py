@@ -11,14 +11,26 @@ os.chdir(r'D:\OneDrive - Universidad Politécnica de Madrid\Curso 21-22\1er Seme
 # Variables de control
 matchear = 1
 methodName = 'orb'
-partesCuerpo = [[800,500],[300,2250],[1500,2250],[500,3650],[1400,3650]]
-radio = 200
+# Persona
+#partesCuerpo = [[800, 500], [300, 2250], [1500, 2250], [500, 3650], [1400, 3650]]
+# Daniel
+#partesCuerpo = [[1000,850],[350,1900],[1550,1900],[770,3100],[1250,3100]]
+# Marta
+#partesCuerpo = [[1500, 600], [600, 2250], [2200, 2250], [1200, 3650], [1750, 3650]]
+# Jorge
+partesCuerpo = [[800, 500], [610, 500], [950, 500], [650, 1800], [850, 1800]]
+# Rodrigo
+#partesCuerpo = [[380, 250], [40, 900], [600, 900], [250, 1400], [480, 1400]]
+# Diego
+#partesCuerpo = [[400, 150], [200, 520], [570, 520], [380, 900], [420, 900]]
+
+radio = 150
 
 # Imágenes
-folder = 'keypointsDetection'  # directory = '../' + folder
-name = 'persona'
-img1Name = folder + '/' + name + '3.jpg'
-img2Name = folder + '/' + name + '4.jpg' # Referencia
+folder = 'keypointsDetection/Images'  # directory = '../' + folder
+name = 'jorge'
+img1Name = folder + '/' + name + '_ref2.jpg'
+img2Name = folder + '/' + name + '_2.jpg' # Referencia
 img1 = cv2.imread(img1Name, 0)
 img2 = cv2.imread(img2Name, 0)
 
@@ -40,6 +52,7 @@ img2KP, img2Des = method.detectAndCompute(img2, None)
 # Dibujarlos
 img1DrawKP = cv2.drawKeypoints(img1, img1KP, None, color=(0, 250, 0), flags=0)
 img2DrawKP = cv2.drawKeypoints(img2, img2KP, None, color=(0, 250, 0), flags=0)
+plt.imshow(img2DrawKP)
 # Guardarlos
 #nameSave = folder + '/' + name + '_' + methodName + '.jpg'
 #cv.imwrite(nameSave,imgKP)
@@ -95,13 +108,16 @@ if matchear == 1:
             puntosEval = matchesCuerpoPt[aux2:k].flatten().tolist()
             for n in range(0,2):   
                 coordsEval = [puntosEval[index] for index in range(n, len(puntosEval), 3)]
-                liminf = scipy.stats.scoreatpercentile(coordsEval, 25)
-                limsup = scipy.stats.scoreatpercentile(coordsEval, 75)
-                print("El 25% percentil es =", liminf, "y el 75% percentil es =", limsup)
-                puntosCuerpo[aux1 - 1, n] = scipy.stats.mstats.tmean(coordsEval, (liminf, limsup))
-                print(puntosCuerpo[aux1 - 1, n])
+                if numPartes[aux1 - 1] == 1:
+                    puntosCuerpo[aux1 - 1, n] = coordsEval[0]
+                else:
+                    liminf = scipy.stats.scoreatpercentile(coordsEval, 25)
+                    limsup = scipy.stats.scoreatpercentile(coordsEval, 75)
+                    print("El 25% percentil es =", liminf, "y el 75% percentil es =", limsup)
+                    puntosCuerpo[aux1 - 1, n] = scipy.stats.mstats.tmean(coordsEval, (liminf, limsup))
+                    print(puntosCuerpo[aux1 - 1, n])
             aux1 = int(match[2])
-            aux2 = k+1
+            aux2 = k
             
     # Media de los puntos importantes
     for k,parte in enumerate(posParte):
@@ -151,6 +167,10 @@ if matchear == 1:
     plt.title('Best Matching Points')
     plt.imshow(result)
     plt.show()
+    
+    # Guardado
+    #nameSave = folder + '/' + name + '_' + methodName + '.jpg'
+    #cv.imwrite(nameSave,imgKP)
 
     # Print total number of matching points between the training and query images
     print("\nNumber of Matching Keypoints Between The Training and Query Images: ", len(matches))
