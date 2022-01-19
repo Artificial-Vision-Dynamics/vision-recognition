@@ -8,8 +8,8 @@ def shape(gray):
     th3 = cv.morphologyEx(th3, cv.MORPH_CLOSE, kernel, iterations=5)
     kernel = np.ones((7,7), np.uint8)
     th3 = cv.morphologyEx(th3, cv.MORPH_OPEN, kernel, iterations=15)
-    # plt.imshow(th3,'gray')
-    # plt.show()
+    plt.imshow(th3,'gray')
+    plt.show()
     mask = cv.inRange(th3, 0, 0)
     cnts = cv.findContours(mask, cv.RETR_TREE, cv.CHAIN_APPROX_NONE)
     cnts = cnts[0] if len(cnts) == 2 else cnts[1]
@@ -25,8 +25,8 @@ def shape(gray):
     return x1,y1,w1,h1
 
 
-
-img_rgb = cv.imread('persona1-1.jpg')
+name = 'daniel'
+img_rgb = cv.imread(name+'.jpg')
 img = cv.cvtColor(img_rgb, cv.COLOR_BGR2GRAY)
 h = len(img)
 w = len(img[0])
@@ -40,11 +40,11 @@ x1,y1,w1,h1 = shape(img0)
 img1 = img0[y1:y1+h1, x1:x1+w1]
 
 ret3,th3 = cv.threshold(img1,0,255,cv.THRESH_BINARY+cv.THRESH_OTSU)
-kernel = np.ones((5,5), np.uint8)
-closing = cv.morphologyEx(th3, cv.MORPH_CLOSE, kernel,iterations=10)
-kernel = np.ones((20,20), np.uint8)
-opening = cv.morphologyEx(closing, cv.MORPH_OPEN, kernel, iterations=20)
-erosion = cv.erode(opening,kernel,iterations = 15)
+kernel = np.ones((7,7), np.uint8)
+closing = cv.morphologyEx(th3, cv.MORPH_CLOSE, kernel,iterations=5)
+kernel = np.ones((15,15), np.uint8)
+opening = cv.morphologyEx(closing, cv.MORPH_OPEN, kernel, iterations=25)
+erosion = cv.erode(opening,kernel,iterations = 10)
 # plt.imshow(erosion,'gray')
 # plt.show()
 
@@ -135,5 +135,5 @@ mask = cv.inRange(filtro3, 0, 0)
 res = cv.bitwise_and(img_rgb, img_rgb, mask=mask)
 plt.imshow(res,'gray')
 plt.show()
-cv.imwrite('dani_mask.jpg', res)
-cv.imwrite('dani_util.jpg',filtro3)
+cv.imwrite(name+'_mask.jpg', res)
+cv.imwrite(name+'_util.jpg',filtro3)
